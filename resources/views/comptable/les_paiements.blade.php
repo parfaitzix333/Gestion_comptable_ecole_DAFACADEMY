@@ -204,7 +204,12 @@
                         </div>
 
                         <div class="table-wrapper">
-                            <table class="table table-striped">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="searchElevesInput"
+                                    placeholder="Rechercher un élève..."><span class="input-group-text bg-primary text-white"><i
+                                        class="fas fa-search"></i></span>
+                            </div>
+                            <table class="table table-striped" id="payTable1">
                                 <thead>
                                     <tr>
                                         <th>#ID</th>
@@ -457,9 +462,13 @@
                             $fraisList = $les_paiements->pluck('frais')->filter()->unique('id');
                         @endphp
                         @foreach ($fraisList as $f)
-                            <option value="{{ $f->id }}">{{ $f->designation }}</option>
+                            <option value="{{ $f->id }}">{{ $f->designation }}
+                                [{{ $f->classe->designation ?? '-' }}]</option>
                         @endforeach
                     </select>
+                </div>
+                <div class="min-width:260px">
+                    <button onclick="exportToExcel()" class="btn btn-success btn-sm text-white">Exporter en Excel</button>
                 </div>
 
                 <div id="resultsSummary" class="ms-auto text-end d-flex flex-column align-items-end"
@@ -498,7 +507,11 @@
                                     <td class="fw-bold text-primary">#{{ $p->id }}</td>
                                     <td>{{ $p->eleve?->nom ?? '—' }}</td>
                                     <td>{{ $p->eleve->classe?->designation ?? '—' }}</td>
-                                    <td>{{ $p->frais?->designation ?? '—' }}</td>
+                                    <td>{{ $p->frais?->designation ?? '—' }} <br>
+                                        <small class="text-light bg-info px-2 py-1 rounded">
+                                            {{ substr($p->frais?->classe->designation ?? '—', 0, 8) }}...
+                                        </small>
+                                    </td>
                                     <td>
                                         @php
                                             $isOverdue = false;
@@ -834,8 +847,8 @@
                                                 }
 
                                                 /* =========================================
-                                                                                                                                                                                       FACTURE A4 CENTRÉE
-                                                                                                                                                                                       ========================================= */
+                                                                                                                                                                                                                                                                               FACTURE A4 CENTRÉE
+                                                                                                                                                                                                                                                                               ========================================= */
                                                 .zoneAimprimer {
                                                     display: block !important;
 
@@ -845,17 +858,17 @@
                                                     left: 50%;
 
                                                     /*
-                                                                                                                                                                                         * 190mm = largeur A4 (210mm)
-                                                                                                                                                                                         * moins 10mm de marge à gauche
-                                                                                                                                                                                         * moins 10mm de marge à droite
-                                                                                                                                                                                         */
+                                                                                                                                                                                                                                                                                 * 190mm = largeur A4 (210mm)
+                                                                                                                                                                                                                                                                                 * moins 10mm de marge à gauche
+                                                                                                                                                                                                                                                                                 * moins 10mm de marge à droite
+                                                                                                                                                                                                                                                                                 */
                                                     width: 190mm;
 
                                                     min-height: 277mm;
 
                                                     /*
-                                                                                                                                                                                         * Centre horizontalement
-                                                                                                                                                                                         */
+                                                                                                                                                                                                                                                                                 * Centre horizontalement
+                                                                                                                                                                                                                                                                                 */
                                                     transform: translateX(-50%);
 
                                                     padding: 0;
@@ -871,8 +884,8 @@
                                                 }
 
                                                 /* =========================================
-                                                                                                                                                                                       ENTÊTE FACTURE
-                                                                                                                                                                                       ========================================= */
+                                                                                                                                                                                                                                                                               ENTÊTE FACTURE
+                                                                                                                                                                                                                                                                               ========================================= */
                                                 #EnteteFacture {
                                                     width: 100%;
                                                     display: flex !important;
@@ -894,8 +907,8 @@
                                                 }
 
                                                 /* =========================================
-                                                                                                                                                                                       TABLEAU DE LA FACTURE
-                                                                                                                                                                                       ========================================= */
+                                                                                                                                                                                                                                                                               TABLEAU DE LA FACTURE
+                                                                                                                                                                                                                                                                               ========================================= */
                                                 .zoneAimprimer table {
                                                     width: 100% !important;
                                                     table-layout: fixed;
@@ -914,8 +927,8 @@
                                                 }
 
                                                 /* =========================================
-                                                                                                                                                                                       SIGNATURES
-                                                                                                                                                                                       ========================================= */
+                                                                                                                                                                                                                                                                               SIGNATURES
+                                                                                                                                                                                                                                                                               ========================================= */
                                                 .zoneAimprimer .row {
                                                     width: 100%;
                                                     margin-left: 0;
@@ -1030,7 +1043,230 @@
         </div>
     </div>
 
+    <!-- Inclure SheetJS -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+
     <script>
+        function exportToExcel() {
+
+            // Vérifier que SheetJS est chargé
+            if (typeof XLSX === 'undefined') {
+                alert(
+                    'Le module Excel n’est pas chargé. Vérifiez votre connexion Internet puis rechargez la page.'
+                );
+                return;
+            }
+
+            const table = document.getElementById('payTable');
+
+            if (!table) {
+                alert('Le tableau des paiements est introuvable.');
+                return;
+            }
+
+
+            // =====================================================
+            // 1. RÉCUPÉRER UNIQUEMENT LES LIGNES PRINCIPALES
+            // =====================================================
+
+            const rows = Array.from(
+                table.querySelectorAll('tbody > tr')
+            ).filter(row => {
+
+                // Ignorer les lignes masquées
+                if (row.style.display === 'none') {
+                    return false;
+                }
+
+                // Ignorer les lignes vides
+                if (row.querySelector('.empty-state')) {
+                    return false;
+                }
+
+                // Une vraie ligne de paiement possède normalement
+                // plusieurs cellules <td>
+                const cells = row.querySelectorAll(':scope > td');
+
+                return cells.length >= 10;
+            });
+
+
+            if (!rows.length) {
+                alert('Aucun paiement visible à exporter.');
+                return;
+            }
+
+
+            // =====================================================
+            // 2. DÉFINIR LES COLONNES À EXPORTER
+            // =====================================================
+
+            const headers = [
+                'ID',
+                'Élève',
+                'Classe',
+                'Frais',
+                'Échéance',
+                'Montant',
+                'Montant en lettres',
+                'Statut',
+                'Mode de paiement',
+                'Date paiement'
+            ];
+
+
+            // =====================================================
+            // 3. CONSTRUIRE LES DONNÉES
+            // =====================================================
+
+            const data = [headers];
+
+
+            rows.forEach(row => {
+
+                const cells = Array.from(
+                    row.querySelectorAll(':scope > td')
+                );
+
+                const clean = function(value) {
+                    return value
+                        .replace(/\s+/g, ' ')
+                        .replace(/\n/g, ' ')
+                        .trim();
+                };
+
+
+                const id = clean(cells[0]?.textContent || '');
+
+                const eleve = clean(cells[1]?.textContent || '');
+
+                const classe = clean(cells[2]?.textContent || '');
+
+                const frais = clean(cells[3]?.textContent || '');
+
+                const echeance = clean(cells[4]?.textContent || '');
+
+                const montant = clean(cells[5]?.textContent || '');
+
+                const montantLettres = clean(cells[6]?.textContent || '');
+
+                const statut = clean(cells[7]?.textContent || '');
+
+                const modePaiement = clean(cells[8]?.textContent || '');
+
+                const datePaiement = clean(cells[9]?.textContent || '');
+
+
+                data.push([
+                    id,
+                    eleve,
+                    classe,
+                    frais,
+                    echeance,
+                    montant,
+                    montantLettres,
+                    statut,
+                    modePaiement,
+                    datePaiement
+                ]);
+            });
+
+
+            // =====================================================
+            // 4. CRÉER LA FEUILLE EXCEL
+            // =====================================================
+
+            const worksheet = XLSX.utils.aoa_to_sheet(data);
+
+
+            // =====================================================
+            // 5. LARGEUR DES COLONNES
+            // =====================================================
+
+            worksheet['!cols'] = [{
+                    wch: 10
+                }, // ID
+                {
+                    wch: 30
+                }, // Élève
+                {
+                    wch: 22
+                }, // Classe
+                {
+                    wch: 40
+                }, // Frais
+                {
+                    wch: 15
+                }, // Échéance
+                {
+                    wch: 15
+                }, // Montant
+                {
+                    wch: 30
+                }, // Montant en lettres
+                {
+                    wch: 15
+                }, // Statut
+                {
+                    wch: 20
+                }, // Mode paiement
+                {
+                    wch: 22
+                } // Date paiement
+            ];
+
+
+            // =====================================================
+            // 6. STYLE / FORMAT DES DONNÉES
+            // =====================================================
+
+            // Figer la première ligne
+            worksheet['!freeze'] = {
+                xSplit: 0,
+                ySplit: 1
+            };
+
+
+            // =====================================================
+            // 7. CRÉER LE FICHIER EXCEL
+            // =====================================================
+
+            const workbook = XLSX.utils.book_new();
+
+            XLSX.utils.book_append_sheet(
+                workbook,
+                worksheet,
+                'Paiements'
+            );
+
+
+            // =====================================================
+            // 8. NOM DU FICHIER
+            // =====================================================
+
+            const maintenant = new Date();
+
+            const jour = String(maintenant.getDate()).padStart(2, '0');
+            const mois = String(maintenant.getMonth() + 1).padStart(2, '0');
+            const annee = maintenant.getFullYear();
+
+            const heure = String(maintenant.getHours()).padStart(2, '0');
+            const minute = String(maintenant.getMinutes()).padStart(2, '0');
+
+            const nomFichier =
+                `paiements_${jour}-${mois}-${annee}_${heure}-${minute}.xlsx`;
+
+
+            // =====================================================
+            // 9. TÉLÉCHARGER
+            // =====================================================
+
+            XLSX.writeFile(
+                workbook,
+                nomFichier
+            );
+        }
+
         function confirmDelete(e) {
             e.preventDefault();
             if (confirm('⚠️ Êtes-vous sûr de vouloir supprimer ce paiement ? Cette action est irréversible.')) {
@@ -1052,6 +1288,20 @@
 
         // Recherche + filtres combinés dans l'historique
         document.addEventListener('DOMContentLoaded', function() {
+            const searchElevesInput = document.getElementById('searchElevesInput');
+            const elevesTable = document.getElementById('payTable1');
+
+            if (searchElevesInput && elevesTable) {
+                searchElevesInput.addEventListener('input', function() {
+                    const query = this.value.toLowerCase().trim();
+
+                    elevesTable.querySelectorAll('tbody > tr').forEach(row => {
+                        row.style.display = row.textContent.toLowerCase().includes(query) ? '' :
+                            'none';
+                    });
+                });
+            }
+
             const searchInput = document.getElementById('searchInput');
             const statusFilter = document.getElementById('statusFilter');
             const classeFilter = document.getElementById('classeFilter');

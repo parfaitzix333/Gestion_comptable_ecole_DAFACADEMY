@@ -270,7 +270,8 @@
             <div class="login-card">
                 <div class="login-header">
                     <div class="login-icon">
-                        <i class="fas fa-chalkboard-teacher"></i>
+                        <img src="{{ asset('image/logo.jpeg') }}" alt="logo"
+                            style="width: 50px; height: 50px; border-radius: 50%;">
                     </div>
                     <h1>DAF ACADEMY</h1>
                     <p>ESPACE ENSEIGNANT</p>

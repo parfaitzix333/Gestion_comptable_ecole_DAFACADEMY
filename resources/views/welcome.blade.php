@@ -45,7 +45,7 @@
                 left: 0;
                 right: 0;
                 bottom: 0;
-                background-image: url("{{ asset('image/globe1.jpg') }}");
+                background-image: url("{{ asset('image/logo.jpeg') }}");
                 background-size: cover;
                 background-position: center;
                 background-repeat: no-repeat;
@@ -61,7 +61,7 @@
                 backdrop-filter: blur(20px);
                 -webkit-backdrop-filter: blur(20px);
                 border-radius: 40px;
-                padding: 50px 45px;
+                padding: 50px 45px 35px;
                 max-width: 900px;
                 width: 100%;
                 border: 1px solid rgba(255, 255, 255, 0.12);
@@ -74,22 +74,35 @@
                 box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8);
             }
 
+            /* ===== LOGO ===== */
+            .logo-wrapper {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-bottom: 18px;
+            }
+
             .school-logo {
-                position: absolute;
-                top: 18px;
-                left: 18px;
-                width: 78px;
-                height: 78px;
+                width: 100px;
+                height: 100px;
                 object-fit: cover;
-                border: 3px solid rgba(247, 201, 72, 0.85);
                 border-radius: 50%;
-                z-index: 2;
+                border: 4px solid rgba(247, 201, 72, 0.85);
+                box-shadow: 0 0 40px rgba(247, 201, 72, 0.15), 0 8px 25px rgba(0, 0, 0, 0.4);
+                transition: all 0.4s ease;
+                background: rgba(255, 255, 255, 0.05);
+            }
+
+            .school-logo:hover {
+                transform: scale(1.04);
+                box-shadow: 0 0 60px rgba(247, 201, 72, 0.25);
+                border-color: #f7c948;
             }
 
             /* ===== EN-TÊTE ===== */
             .header-title {
                 text-align: center;
-                margin-bottom: 30px;
+                margin-bottom: 20px;
             }
 
             .header-title h1 {
@@ -125,6 +138,20 @@
                 background: linear-gradient(90deg, #f7c948, #f5a623);
                 margin: 15px auto 25px;
                 border-radius: 10px;
+            }
+
+            /* ===== BADGE D'ÉTAT ===== */
+            .status-badge {
+                display: inline-block;
+                background: rgba(37, 211, 102, 0.2);
+                border: 1px solid rgba(37, 211, 102, 0.3);
+                color: #7ae9a5;
+                padding: 4px 18px;
+                border-radius: 50px;
+                font-size: 0.75rem;
+                font-weight: 400;
+                letter-spacing: 1px;
+                margin-bottom: 10px;
             }
 
             /* ===== CONTACT LINKS ===== */
@@ -188,7 +215,31 @@
                 box-shadow: 0 10px 30px rgba(66, 133, 244, 0.3);
             }
 
-            /* ===== BOUTONS DE NAVIGATION ===== */
+            /* ===== INFORMATIONS DE L'ÉCOLE ===== */
+            .school-information {
+                margin: 25px 0;
+                padding: 22px 24px;
+                text-align: center;
+                color: rgba(255, 255, 255, 0.9);
+                background: rgba(255, 255, 255, 0.08);
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                border-radius: 18px;
+            }
+
+            .school-information h2 {
+                margin-bottom: 8px;
+                color: #f7c948;
+                font-family: 'Playfair Display', serif;
+                font-size: 1.45rem;
+            }
+
+            .school-information p {
+                margin: 0;
+                line-height: 1.7;
+                font-size: 0.92rem;
+            }
+
+            /* ===== NAVIGATION ===== */
             .nav-buttons {
                 display: flex;
                 flex-wrap: wrap;
@@ -242,44 +293,6 @@
                 transform: translateY(-3px);
             }
 
-            /* ===== BADGE D'ÉTAT ===== */
-            .status-badge {
-                display: inline-block;
-                background: rgba(37, 211, 102, 0.2);
-                border: 1px solid rgba(37, 211, 102, 0.3);
-                color: #7ae9a5;
-                padding: 4px 18px;
-                border-radius: 50px;
-                font-size: 0.75rem;
-                font-weight: 400;
-                letter-spacing: 1px;
-                margin-bottom: 5px;
-            }
-
-            /* ===== INFORMATIONS DE L'ÉCOLE ===== */
-            .school-information {
-                margin: 25px 0;
-                padding: 22px 24px;
-                text-align: center;
-                color: rgba(255, 255, 255, 0.9);
-                background: rgba(255, 255, 255, 0.08);
-                border: 1px solid rgba(255, 255, 255, 0.12);
-                border-radius: 18px;
-            }
-
-            .school-information h2 {
-                margin-bottom: 8px;
-                color: #f7c948;
-                font-family: 'Playfair Display', serif;
-                font-size: 1.45rem;
-            }
-
-            .school-information p {
-                margin: 0;
-                line-height: 1.7;
-                font-size: 0.92rem;
-            }
-
             /* ===== FOOTER ===== */
             .site-footer {
                 margin-top: 30px;
@@ -313,8 +326,13 @@
             /* ===== RESPONSIVE ===== */
             @media (max-width: 768px) {
                 .main-card {
-                    padding: 30px 20px;
+                    padding: 30px 20px 25px;
                     border-radius: 28px;
+                }
+
+                .school-logo {
+                    width: 80px;
+                    height: 80px;
                 }
 
                 .header-title h1 {
@@ -344,10 +362,9 @@
                 }
 
                 .school-logo {
-                    top: 12px;
-                    left: 12px;
-                    width: 58px;
-                    height: 58px;
+                    width: 65px;
+                    height: 65px;
+                    border-width: 3px;
                 }
 
                 .header-title h1 {
@@ -375,9 +392,13 @@
 
         <div class="main-card">
 
+            <!-- ===== LOGO ===== -->
+            <div class="logo-wrapper">
+                <img src="{{ asset('image/logo.jpeg') }}" alt="Logo DAF ACADEMY" class="school-logo">
+            </div>
+
             <!-- ===== EN-TÊTE ===== -->
             <div class="header-title">
-                <img src="{{ asset('image/logo.jpeg') }}" alt="logo DAF ACADEMY" class="school-logo">
                 <div class="status-badge">
                     <i class="fas fa-graduation-cap"></i> Établissement d'Excellence
                 </div>
@@ -421,7 +442,7 @@
 
                     <!-- Adresse -->
                     <a href="https://www.google.com/maps/search/?api=1&query={{ $les_contacts->latitude }},{{ $les_contacts->longitude }}"
-                        target="_blank">
+                        target="_blank" class="location">
                         <i class="fas fa-map-marker-alt"></i>
                         {{ Str::limit($les_contacts->adresse, 30) }}
                     </a>

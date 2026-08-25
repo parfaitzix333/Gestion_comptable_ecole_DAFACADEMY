@@ -30,6 +30,8 @@
                         <th>#ID</th>
                         <th>Email</th>
                         <th>Téléphone</th>
+                        <th>Latitude</th>
+                        <th>Longitude</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -39,6 +41,8 @@
                             <td class="fw-bold text-primary">#{{ $c->id }}</td>
                             <td>{{ $c->couriel }}</td>
                             <td>{{ $c->tel }}</td>
+                            <td>{{ $c->latitude }}</td>
+                            <td>{{ $c->longitude }}</td>
                             <td>{{ $c->adresse }}</td>
                             <td>
                                 <div class="action-buttons">
@@ -70,6 +74,16 @@
                                             </div>
                                             <div class="form-group"><label class="form-label">Adresse</label><input
                                                     name="adresse" class="form-control-modern" value="{{ $c->adresse }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Latitude</label>
+                                                <input type="numeric" name="latitude" class="form-control-modern"
+                                                    id="latitude" placeholder="-11.12345...." value="{{ $c->latitude }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Longitude</label>
+                                                <input type="numeric" class="form-control-modern" name="longitude"
+                                                    id="longitude" placeholder="27.113524..." value="{{ $c->longitude }}">
                                             </div>
                                         </div>
                                         <div class="modal-footer"><button type="button" class="btn btn-secondary"
@@ -113,18 +127,16 @@
                         </div>
 
                         <div class="form-group">
-                            <button type="button" class="btn btn-outline-primary" id="getLocationBtn">
-                                <i class="fas fa-location-crosshairs"></i>
-                                Utiliser ma position actuelle
-                            </button>
-
-                            <small id="locationStatus" class="d-block mt-2 text-muted">
-                                Aucune position récupérée
-                            </small>
+                            <label class="form-label">Latitude</label>
+                            <input type="numeric" name="latitude" class="form-control-modern" id="latitude"
+                                placeholder="-11.12345....">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Longitude</label>
+                            <input type="numeric" class="form-control-modern" name="longitude" id="longitude"
+                                placeholder="27.113524...">
                         </div>
 
-                        <input type="hidden" name="latitude" id="latitude">
-                        <input type="hidden" name="longitude" id="longitude">
                     </div>
                     <div class="modal-footer"><button type="button" class="btn btn-secondary"
                             data-bs-dismiss="modal">Annuler</button><button class="btn-submit">Créer</button></div>
